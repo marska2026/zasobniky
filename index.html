@@ -1,1 +1,82 @@
-test
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Zasobniky</title>
+  <style>
+    :root{--bg:#0d0f18;--card:#161925;--border:#252838;--text:#dde3f0;--muted:#5a6380;--accent:#4f7cff;}
+    *{box-sizing:border-box;margin:0;padding:0;}
+    body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,-apple-system,sans-serif;
+         min-height:100vh;display:flex;align-items:flex-start;justify-content:center;padding:1.2rem 0.8rem;}
+    .card{background:var(--card);border:1px solid var(--border);border-radius:14px;
+          padding:1.2rem 1rem;width:100%;max-width:420px;box-shadow:0 6px 30px rgba(0,0,0,.6);}
+    h1{font-size:1.1rem;font-weight:700;color:var(--accent);letter-spacing:.03em;}
+    .subtitle{font-size:.72rem;color:var(--muted);margin-top:.2rem;margin-bottom:1rem;}
+    table{width:100%;border-collapse:collapse;}
+    td{padding:.55rem 0;border-bottom:1px solid var(--border);vertical-align:middle;}
+    tr:last-child td{border-bottom:none;}
+    td.name{font-size:.85rem;font-weight:600;white-space:nowrap;width:90px;}
+    td.bar-cell{padding-left:.5rem;padding-right:.5rem;}
+    td.pct{font-size:.82rem;font-variant-numeric:tabular-nums;text-align:right;white-space:nowrap;width:36px;color:var(--muted);}
+    td.dot-cell{text-align:center;width:24px;padding-left:.4rem;}
+    .bar-wrap{background:var(--border);border-radius:999px;height:8px;overflow:hidden;}
+    .bar{height:100%;border-radius:999px;}
+    .dot{display:inline-block;width:10px;height:10px;border-radius:50%;}
+    .footer{margin-top:.9rem;font-size:.68rem;color:var(--muted);text-align:right;}
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="header">
+      <h1>Stav zasobniku</h1>
+      <div class="subtitle" id="subtitle">Nacitam data...</div>
+    </div>
+    <table><tbody id="rows"></tbody></table>
+    <div class="footer">ZasobnikyMonitor</div>
+  </div>
+  <script>
+    var INTERVAL = 5;
+    var JSON_URL = "https://raw.githubusercontent.com/marska2026/zasobniky/main/data.json";
+
+    function getColor(v) {
+      if (v < 0)  return "#6b7280";
+      if (v < 40) return "#2ecc71";
+      if (v < 60) return "#f1c40f";
+      if (v < 80) return "#e67e22";
+      return "#e74c3c";
+    }
+
+    function render(data) {
+      var rows = "";
+      for (var i = 0; i < data.data.length; i++) {
+        var item  = data.data[i];
+        var v     = item.value;
+        var color = getColor(v);
+        var barW  = v < 0 ? 100 : v;
+        var barC  = v < 0 ? "#252838" : color;
+        rows += "<tr>" +
+          "<td class='name'>" + item.name + "</td>" +
+          "<td class='bar-cell'><div class='bar-wrap'><div class='bar' style='width:" + barW + "%;background:" + barC + "'></div></div></td>" +
+          "<td class='pct'>" + v + "%</td>" +
+          "<td class='dot-cell'><span class='dot' style='background:" + color + "'></span></td>" +
+          "</tr>";
+      }
+      document.getElementById("rows").innerHTML = rows;
+      document.getElementById("subtitle").textContent = "Aktualizovano: " + data.timestamp + "  \u00b7  Obnova " + INTERVAL + " min";
+    }
+
+    function load() {
+      fetch(JSON_URL + "?t=" + Date.now())
+        .then(function(r) { return r.json(); })
+        .then(function(d) { render(d); })
+        .catch(function() {
+          document.getElementById("subtitle").textContent = "Chyba pri nacitani dat.";
+        });
+    }
+
+    load();
+    setInterval(load, INTERVAL * 60 * 1000);
+  </script>
+</body>
+</html>
