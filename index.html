@@ -36,7 +36,7 @@
     <div class="footer">ZasobnikyMonitor</div>
   </div>
   <script>
-    var INTERVAL = 5;
+    var INTERVAL = 15;
     var JSON_URL = "https://raw.githubusercontent.com/marska2026/zasobniky/main/data.json";
 
     function getColor(v) {
@@ -63,7 +63,9 @@
           "</tr>";
       }
       document.getElementById("rows").innerHTML = rows;
-      document.getElementById("subtitle").textContent = "Aktualizovano: " + data.timestamp + "  \u00b7  Obnova " + INTERVAL + " min";
+      var iv = data.interval ? data.interval : INTERVAL;
+      document.getElementById("subtitle").textContent = "Aktualizovano: " + data.timestamp + "  \u00b7  Obnova " + iv + " min";
+      setTimeout(load, iv * 60 * 1000);
     }
 
     function load() {
@@ -76,7 +78,6 @@
     }
 
     load();
-    setInterval(load, INTERVAL * 60 * 1000);
   </script>
 </body>
 </html>
